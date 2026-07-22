@@ -1,11 +1,1425 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INSTITUTO PROFESIONAL SEMATEC</title>
+    <title>Sistema de Gestión Integral - Instituto Sematec</title>
+    <!-- Tailwind CSS para diseño moderno y limpio -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconos Lucide para una interfaz profesional -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
-    <h1>INSTITUTO PROFESIONAL SEMATEC</h1>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans">
+
+    <!-- BOTÓN FLOTANTE PARA NAVEGAR A LA CUENTA/SITIO DEL INSTITUTO -->
+    <a href="https://www.sematecspa.cl" target="_blank" class="fixed bottom-5 right-5 z-50 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-3 rounded-full shadow-lg transition flex items-center gap-2 text-xs md:text-sm">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        Cuenta Instituto
+    </a>
+
+    <!-- ========================================== -->
+    <!-- 1. VISTA DE LOGIN Y RECUPERACIÓN DE CLAVE  -->
+    <!-- ========================================== -->
+    <div id="login-screen" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full border border-gray-100">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-md">
+                    <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900">INSTITUTO PROFESIONAL SEMATEC</h1>
+                <p class="text-sm text-gray-500 mt-1">Control de Acceso Basado en Roles (RBAC)</p>
+            </div>
+
+            <!-- VISTA FORMULARIO DE ACCESO -->
+            <div id="login-container-view">
+                <div id="login-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-200">
+                    Credenciales incorrectas. Inténtalo de nuevo.
+                </div>
+
+                <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Correo Electrónico</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </span>
+                            <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="ejemplo@sematec.cl">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Contraseña</label>
+                            <button type="button" onclick="toggleRecoverView(true)" class="text-xs text-blue-600 hover:underline font-medium">¿Olvidaste tu contraseña?</button>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </span>
+                            <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2 mt-2 shadow-sm">
+                        Ingresar al Sistema
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- VISTA RECUPERACIÓN DE CONTRASEÑA -->
+            <div id="recover-container-view" class="hidden">
+                <div class="mb-4">
+                    <h3 class="text-sm font-bold text-gray-900">Recuperación de Contraseña</h3>
+                    <p class="text-xs text-gray-500 mt-1">Ingresa tu correo institucional registrado para enviarte un enlace de restablecimiento temporal.</p>
+                </div>
+
+                <div id="recover-success" class="hidden bg-emerald-50 text-emerald-700 p-3 rounded-lg text-xs mb-4 border border-emerald-200">
+                    ¡Correo enviado! Revisa tu bandeja de entrada con las instrucciones para reestablecer tu clave.
+                </div>
+
+                <form onsubmit="handleRecoverPassword(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Correo Institucional</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </span>
+                            <input type="email" id="recover-email" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="correo@sematec.cl">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2 shadow-sm">
+                        Enviar Enlace de Recuperación
+                    </button>
+
+                    <button type="button" onclick="toggleRecoverView(false)" class="w-full text-center text-xs text-gray-500 hover:text-gray-800 font-medium py-1">
+                        ← Volver al Acceso
+                    </button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. ESTRUCTURA PRINCIPAL DEL DASHBOARD      -->
+    <!-- ========================================== -->
+    <div id="main-dashboard" class="hidden flex-1 flex flex-col md:flex-row min-h-screen">
+        
+        <!-- BARRA LATERAL (SIDEBAR - DINÁMICA POR ROL) -->
+        <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800">
+            <!-- Header del Sidebar -->
+            <div class="p-4 border-b border-slate-800 flex items-center gap-3 bg-slate-950">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-white text-sm tracking-wide">SEMATEC</h2>
+                    <span id="user-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">Rol</span>
+                </div>
+            </div>
+
+            <!-- Perfil del Usuario Activo -->
+            <div class="p-4 border-b border-slate-800 flex items-center gap-3 bg-slate-900/50">
+                <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-sm" id="user-avatar">
+                    U
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-medium text-white truncate" id="user-display-name">Nombre Usuario</p>
+                    <p class="text-xs text-slate-400 truncate" id="user-display-email">correo@sematec.cl</p>
+                </div>
+            </div>
+
+            <!-- Menú de Navegación Dinámico -->
+            <nav class="flex-1 p-3 space-y-1 overflow-y-auto" id="sidebar-menu">
+                <!-- Los botones del menú se inyectan automáticamente mediante JavaScript según el Rol -->
+            </nav>
+
+            <!-- Botón de Cerrar Sesión -->
+            <div class="p-3 border-t border-slate-800 bg-slate-950">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition font-medium">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+        <main class="flex-1 flex flex-col bg-slate-50">
+            <!-- Barra superior -->
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800">Panel de Control</h2>
+                    <span id="current-date-display" class="hidden md:inline-block text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full"></span>
+                </div>
+                
+                <!-- CUADRO DE BÚSQUEDA GLOBAL DEL SISTEMA -->
+                <div class="relative w-full sm:w-72">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="global-search-input" onkeyup="ejecutarBusquedaGlobal(this.value)" placeholder="Buscar por Nombre, RUT o Archivos..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                </div>
+            </header>
+
+            <!-- Contenedor Dinámico de Módulos -->
+            <div class="p-6 flex-1 overflow-y-auto max-w-7xl w-full mx-auto">
+                <div id="module-container">
+                    <!-- Aquí se despliega el módulo que esté seleccionado -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. LÓGICA DE PROGRAMACIÓN (JAVASCRIPT)     -->
+    <!-- ========================================== -->
+    <script>
+        // BASE DE DATOS GLOBAL DE ALUMNOS CON SUS RESPECTIVOS CURSOS Y FINANZAS ASOCIADAS
+        let ALUMNOS_FINANZAS_DB = {
+            "20.456.789-K": {
+                nombre: "Martín Carrasco",
+                rut: "20.456.789-K",
+                email: "alumno@sematec.cl",
+                curso: "Desarrollo de Software v2",
+                mensualidad: 150000,
+                duracionMeses: 10,
+                asistencia: 95,
+                nota: 6.8,
+                telefono: "+56 9 8765 4321",
+                direccion: "Av. Alameda 456, Santiago",
+                pagosHistorial: [
+                    { fecha: "2026-03-05", monto: 150000 },
+                    { fecha: "2026-04-04", monto: 150000 },
+                    { fecha: "2026-05-10", monto: 150000 }
+                ]
+            },
+            "19.888.777-2": {
+                nombre: "Valentina Soto",
+                rut: "19.888.777-2",
+                email: "valentina@sematec.cl",
+                curso: "Administración de Redes y Conectividad",
+                mensualidad: 130000,
+                duracionMeses: 12,
+                asistencia: 90,
+                nota: 6.5,
+                telefono: "+56 9 1122 3344",
+                direccion: "Providencia 123, Santiago",
+                pagosHistorial: [
+                    { fecha: "2026-03-02", monto: 130000 }
+                ]
+            }
+        };
+
+        // Variable global para controlar qué alumno se está visualizando en el módulo de Finanzas
+        let rutAlumnoSeleccionadoFinanzas = "20.456.789-K";
+
+        // Listado de cursos/grupos dinámicos de la institución (con precio, modalidad, horario y días configurables)
+        let CURSOS_INSTITUCION = [
+            { id: "DS01", nombre: "ofimatica y computación", precio: 50000, duracion: "6 meses", modalidad: "Semipresencial", horario: "19:00 - 22:00 hrs", dias: "Lunes y Miércoles", descripcion: "El curso de Informática está diseñado para desarrollar las competencias digitales necesarias para el ámbito académico y laboral. Los estudiantes aprenderán el uso de herramientas informáticas esenciales, incluyendo Windows, Microsoft Word, Excel, PowerPoint, navegación por Internet, correo electrónico y gestión de archivos. Al finalizar el curso, los participantes estarán preparados para utilizar la tecnología de manera eficiente en sus estudios, trabajo o emprendimiento." },
+            { id: "TI02", nombre: "Administración de Redes y Conectividad", precio: 100000, duracion: "12 meses", modalidad: "Online", horario: "09:00 - 13:00 hrs", dias: "Sábados", descripcion: "Configuración de enrutadores, servidores y protocolos de seguridad informática." },
+            { id: "CS03", nombre: "Curso excel avanzado", precio: 100000, duracion: "8 meses", modalidad: "Presencial", horario: "18:30 - 21:30 hrs", dias: "Martes y Jueves", descripcion: "Protección de datos empresariales y análisis de vulnerabilidades de redes." },
+            { id: "DS01", nombre: "curso de ingles", precio: 70000, duracion: "6 meses", modalidad: "Semipresencial", horario: "19:00 - 22:00 hrs", dias: "Lunes y Miércoles", descripcion: "El curso de Inglés tiene como objetivo desarrollar las habilidades de comunicación en el idioma inglés mediante un aprendizaje práctico y progresivo. Los estudiantes fortalecerán la comprensión auditiva, la expresión oral, la lectura y la escritura, adquiriendo el vocabulario y las estructuras gramaticales necesarias para desenvolverse en situaciones cotidianas, académicas y profesionales." },
+            { id: "TI02", nombre: "curso de español ", precio: 100000, duracion: "12 meses", modalidad: "Online", horario: "09:00 - 13:00 hrs", dias: "Sábados", descripcion: "El curso de Español está dirigido a personas que desean aprender o mejorar su dominio del idioma. Los estudiantes desarrollarán competencias en comprensión lectora, escritura, pronunciación, gramática y comunicación oral. El programa está orientado a facilitar la integración social, académica y laboral de los participantes, permitiéndoles comunicarse con confianza en diferentes contextos." },
+            { id: "CS03", nombre: "curso de sublimacion", precio: 100000, duracion: "8 meses", modalidad: "Presencial", horario: "18:30 - 21:30 hrs", dias: "Martes y Jueves", descripcion: "El curso de Sublimación ofrece una formación práctica para aprender el proceso de personalización de productos mediante impresión por sublimación. Los estudiantes conocerán el manejo de equipos, el diseño de imágenes, el uso de software de edición y las técnicas de estampado sobre tazas, camisetas, gorras, llaveros y otros artículos promocionales. Al finalizar el curso, estarán preparados para iniciar un emprendimiento o trabajar en el área de personalización de productos" }   
+        ];
+
+
+        // Base de usuarios modificable en tiempo real (CRUD)
+        let USERS_DB = {
+            "marcvertisma@gmail.com": { name: "Marc Andre Vertisma (Director)", rut: "26.873.415-5", role: "Administrador", pass: "admin123" },
+        "louimaire9@gmail.com": { name: "Seggerson Roosvelvelt Louimaire (Director)", rut: "26.200.620-4", role: "Administrador", pass: "admin123" },
+            "profe@sematec.cl": { name: "Profesor", rut: "16.789.012-3", role: "Profesor", pass: "profe123" },
+            "alumno@sematec.cl": { name: "Martín Carrasco", rut: "20.456.789-K", role: "Estudiante", pass: "alumno123" },
+            "valentina@sematec.cl": { name: "Valentina Soto", rut: "19.888.777-2", role: "Estudiante", pass: "valentina123" }
+        };
+
+        // Listado de matrículas formales subidas desde dispositivo
+        let MATRICULAS_REGISTRADAS = [
+            { id: 1, alumno: "Martín Carrasco", rut: "20.456.789-K", curso: "Desarrollo de Software v2", duracionMeses: 10, modalidad: "Semipresencial", horario: "19:00 - 22:00 hrs", dias: "Lunes y Miércoles", fecha: "2026-03-01", archivo: "certificado_estudios_martin.pdf" },
+            { id: 2, alumno: "Valentina Soto", rut: "19.888.777-2", curso: "Administración de Redes y Conectividad", duracionMeses: 12, modalidad: "Online", horario: "09:00 - 13:00 hrs", dias: "Sábados", fecha: "2026-03-02", archivo: "cedula_identidad_valentina.jpg" }
+        ];
+
+        // Borrador guardado localmente para el formulario de matrícula
+        let BORRADOR_MATRICULA = null;
+
+        // Libro de estudio o bitácora de clases añadidos por los profesores
+        let LIBROS_ESTUDIO = [
+            { id: 1, curso: "Desarrollo de Software v2", tema: "Introducción a Bases de Datos y Modelamiento SQL", fecha: "2026-07-10", archivo: "materia_sql.pdf" },
+            { id: 2, curso: "Desarrollo de Software v2", tema: "Estructura de Control de Flujo y Funciones", fecha: "2026-07-15", archivo: "guia_funciones.docx" }
+        ];
+
+        let profesorAutorizadoPagos = true;
+
+        let auditoriaLogs = [
+            { fecha: "2026-07-20 10:15", usuario: "SISTEMA", accion: "Carga de índices y seguridad por roles RBAC listos." }
+        ];
+
+        let currentUser = null;
+        let currentModuleId = 'usuarios';
+        let searchQueryGlobal = '';
+
+        window.onload = function() {
+            lucide.createIcons();
+            const dateEl = document.getElementById('current-date-display');
+            if (dateEl) {
+                dateEl.innerText = new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+        };
+
+        // FUNCIONES DE CÁLCULO FINANCIERO AUTOMÁTICO PARA UN ALUMNO ESPECÍFICO
+        function obtenerAlumnoFinanzasActual() {
+            if (currentUser && currentUser.role === 'Estudiante') {
+                // Si el usuario es estudiante, buscamos por su RUT en la BD de finanzas
+                for (let r in ALUMNOS_FINANZAS_DB) {
+                    if (ALUMNOS_FINANZAS_DB[r].email === currentUser.email) {
+                        return ALUMNOS_FINANZAS_DB[r];
+                    }
+                }
+            }
+            // Si es admin o profesor, retornamos el alumno seleccionado en la vista
+            return ALUMNOS_FINANZAS_DB[rutAlumnoSeleccionadoFinanzas] || Object.values(ALUMNOS_FINANZAS_DB)[0];
+        }
+
+        function calcularCostoTotal(alumno) { return alumno.mensualidad * alumno.duracionMeses; }
+        function calcularTotalPagado(alumno) { return alumno.pagosHistorial.reduce((sum, pago) => sum + pago.monto, 0); }
+        function calcularSaldoPendiente(alumno) { return calcularCostoTotal(alumno) - calcularTotalPagado(alumno); }
+        function calcularPorcentajeAvance(alumno) { return calcularCostoTotal(alumno) === 0 ? 0 : ((calcularTotalPagado(alumno) / calcularCostoTotal(alumno)) * 100).toFixed(0); }
+        function calcularEstadoPago(alumno) {
+            const totalPagado = calcularTotalPagado(alumno);
+            const costoTotal = calcularCostoTotal(alumno);
+            if (totalPagado >= costoTotal) return "Al día";
+            if (totalPagado > 0) return "Pago parcial";
+            return "Pendiente";
+        }
+        function formatMoney(amount) { return '$' + amount.toLocaleString('es-CL'); }
+
+        // MANEJO DE ACCESO (LOGIN Y RECUPERACIÓN)
+        function toggleRecoverView(showRecover) {
+            const loginView = document.getElementById('login-container-view');
+            const recoverView = document.getElementById('recover-container-view');
+            const successBox = document.getElementById('recover-success');
+            
+            if (showRecover) {
+                loginView.classList.add('hidden');
+                recoverView.classList.remove('hidden');
+                successBox.classList.add('hidden');
+            } else {
+                recoverView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+            }
+        }
+
+        function handleRecoverPassword(event) {
+            event.preventDefault();
+            const email = document.getElementById('recover-email').value.trim();
+            const successBox = document.getElementById('recover-success');
+            
+            if (USERS_DB[email] || email.includes('@sematec.cl')) {
+                successBox.classList.remove('hidden');
+                registrarLog(email, "Solicitud de recuperación de contraseña generada con éxito.");
+                setTimeout(() => {
+                    toggleRecoverView(false);
+                }, 3500);
+            } else {
+                alert("El correo electrónico ingresado no se encuentra registrado en el sistema institucional.");
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('login-error');
+
+            if (USERS_DB[email] && USERS_DB[email].pass === pass) {
+                errorBox.className = 'hidden';
+                currentUser = { email: email, ...USERS_DB[email] };
+                
+                document.getElementById('login-screen').className = 'hidden';
+                document.getElementById('main-dashboard').className = 'flex-1 flex flex-col md:flex-row min-h-screen';
+                
+                registrarLog(currentUser.email, "Inicio de sesión correcto.");
+                setupDashboardForRole();
+            } else {
+                errorBox.className = 'bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-200 block';
+            }
+        }
+
+        function logout() {
+            if (currentUser) {
+                registrarLog(currentUser.email, "Cierre de sesión manual.");
+            }
+            currentUser = null;
+            document.getElementById('main-dashboard').className = 'hidden';
+            document.getElementById('login-screen').className = 'flex-1 flex items-center justify-center p-4';
+            document.getElementById('login-form').reset();
+            toggleRecoverView(false);
+        }
+
+        function registrarLog(usuario, accion) {
+            const ahora = new Date().toISOString().replace('T', ' ').substring(0, 16);
+            auditoriaLogs.unshift({ fecha: ahora, usuario: usuario, accion: accion });
+        }
+
+        function setupDashboardForRole() {
+            document.getElementById('user-display-name').innerText = currentUser.name;
+            document.getElementById('user-display-email').innerText = currentUser.email;
+            document.getElementById('user-avatar').innerText = currentUser.name.charAt(0);
+            
+            const badge = document.getElementById('user-badge');
+            badge.innerText = currentUser.role;
+            badge.className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ";
+            
+            if (currentUser.role === 'Administrador') badge.classList.add('bg-blue-500/20', 'text-blue-400', 'border-blue-500/30');
+            if (currentUser.role === 'Profesor') badge.classList.add('bg-indigo-500/20', 'text-indigo-400', 'border-indigo-500/30');
+            if (currentUser.role === 'Estudiante') badge.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30');
+
+            renderSidebarMenu();
+            
+            if (currentUser.role === 'Administrador') loadModule('usuarios');
+            if (currentUser.role === 'Profesor') loadModule('academico');
+            if (currentUser.role === 'Estudiante') loadModule('mi-perfil');
+        }
+
+        function renderSidebarMenu() {
+            const menuContainer = document.getElementById('sidebar-menu');
+            menuContainer.innerHTML = ''; 
+
+            const menuItems = [
+                { id: 'usuarios', label: 'Gestión de Usuarios', icon: 'users', roles: ['Administrador'] },
+                { id: 'matriculas', label: 'Formulario de Matrícula', icon: 'file-plus', roles: ['Administrador'] },
+                { id: 'academico', label: 'Control Académico', icon: 'book-open', roles: ['Administrador', 'Profesor'] },
+                { id: 'cursos-disponibles', label: 'Cursos y Precios', icon: 'grid', roles: ['Administrador', 'Profesor'] },
+                { id: 'pagos', label: 'Finanzas y Pagos', icon: 'credit-card', roles: ['Administrador'] }, 
+                { id: 'reportes', label: 'Auditoría y Logs', icon: 'bar-chart-3', roles: ['Administrador'] },
+                { id: 'mi-perfil', label: 'Mi Información', icon: 'user', roles: ['Estudiante'] },
+                { id: 'mensajeria', label: 'Comunicaciones', icon: 'send', roles: ['Administrador', 'Profesor', 'Estudiante'] }
+            ];
+
+            menuItems.forEach(item => {
+                if (item.roles.includes(currentUser.role)) {
+                    const btn = document.createElement('button');
+                    btn.id = `btn-${item.id}`;
+                    btn.onclick = () => loadModule(item.id);
+                    btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-800 hover:text-white mb-1";
+                    btn.innerHTML = `<i data-lucide="${item.icon}" class="w-4 h-4"></i> <span>${item.label}</span>`;
+                    menuContainer.appendChild(btn);
+                }
+            });
+            lucide.createIcons();
+        }
+
+        // BÚSQUEDA GLOBAL
+        function ejecutarBusquedaGlobal(query) {
+            searchQueryGlobal = query.toLowerCase().trim();
+            loadModule(currentModuleId);
+        }
+
+        // ACTUALIZACIÓN DE PRECIOS Y PARÁMETROS DE CURSOS DESDE LA INTERFAZ
+        function actualizarPrecioCursoAdmin(event, cursoId) {
+            event.preventDefault();
+            const nuevoPrecio = parseInt(document.getElementById(`precio-${cursoId}`).value);
+            const cursoObj = CURSOS_INSTITUCION.find(c => c.id === cursoId);
+
+            if (cursoObj && !isNaN(nuevoPrecio)) {
+                cursoObj.precio = nuevoPrecio;
+                registrarLog(currentUser.email, `Modificó el arancel/precio del curso "${cursoObj.nombre}" a ${formatMoney(nuevoPrecio)}`);
+                alert(`Precio del curso "${cursoObj.nombre}" actualizado correctamente a ${formatMoney(nuevoPrecio)}.`);
+                loadModule('cursos-disponibles');
+            }
+        }
+
+        // AUTO-LLENAR HORARIO, DÍAS Y DURACIÓN AL SELECCIONAR CURSO EN MATRÍCULA
+        function onCursoMatriculaChange() {
+            const cursoSelectName = document.getElementById('mat-curso').value;
+            const cursoObj = CURSOS_INSTITUCION.find(c => c.nombre === cursoSelectName);
+            if (cursoObj) {
+                const modalSelect = document.getElementById('mat-modalidad');
+                const diasInput = document.getElementById('mat-dias');
+                const horarioInput = document.getElementById('mat-horario');
+                const duracionInput = document.getElementById('mat-duracion');
+                
+                if (modalSelect) modalSelect.value = cursoObj.modalidad;
+                if (diasInput) diasInput.value = cursoObj.dias;
+                if (horarioInput) horarioInput.value = cursoObj.horario;
+                
+                // Extraer número de meses de la cadena (ej: "10 meses" -> 10)
+                if (duracionInput && cursoObj.duracion) {
+                    const matchMeses = cursoObj.duracion.match(/\d+/);
+                    if (matchMeses) duracionInput.value = parseInt(matchMeses[0]);
+                }
+            }
+        }
+
+        // ACCIONES DE MATRÍCULA: GUARDAR BORRADOR, SEGUIR, CANCELAR Y CARGAR ARCHIVOS
+        function guardarBorradorMatricula() {
+            const nombre = document.getElementById('mat-nombre').value.trim();
+            const rut = document.getElementById('mat-rut').value.trim();
+            const email = document.getElementById('mat-email').value.trim();
+            const cursoNombre = document.getElementById('mat-curso').value;
+            const modalidad = document.getElementById('mat-modalidad').value;
+            const horario = document.getElementById('mat-horario').value;
+            const dias = document.getElementById('mat-dias').value;
+            const duracionMeses = parseInt(document.getElementById('mat-duracion').value) || 10;
+
+            if (!nombre && !rut && !email) {
+                alert("Completa al menos un campo para guardar un borrador.");
+                return;
+            }
+
+            BORRADOR_MATRICULA = { nombre, rut, email, curso: cursoNombre, modalidad, horario, dias, duracionMeses };
+            registrarLog(currentUser ? currentUser.email : "Invitado", "Guardó borrador de matrícula en curso.");
+            alert("¡Borrador guardado con éxito! Podrás recuperarlo cuando vuelvas a ingresar al formulario.");
+            loadModule('matriculas');
+        }
+
+        function cancelarMatriculaForm() {
+            if (confirm("¿Estás seguro de cancelar? Se limpiarán los datos actuales del formulario.")) {
+                BORRADOR_MATRICULA = null;
+                const form = document.getElementById('form-matricula-principal');
+                if (form) form.reset();
+                loadModule('matriculas');
+            }
+        }
+
+        function procesarMatriculaFormulario(event) {
+            event.preventDefault();
+            const nombre = document.getElementById('mat-nombre').value.trim();
+            const rut = document.getElementById('mat-rut').value.trim();
+            const email = document.getElementById('mat-email').value.trim();
+            const cursoNombre = document.getElementById('mat-curso').value;
+            const modalidad = document.getElementById('mat-modalidad').value;
+            const horario = document.getElementById('mat-horario').value;
+            const dias = document.getElementById('mat-dias').value;
+            const duracionMesesNum = parseInt(document.getElementById('mat-duracion').value) || 10;
+            const fileInput = document.getElementById('mat-archivo');
+            
+            let nombreArchivo = "documento_respaldo.pdf";
+            if (fileInput.files && fileInput.files[0]) {
+                nombreArchivo = fileInput.files[0].name;
+            }
+
+            const hoy = new Date().toISOString().split('T')[0];
+
+            // 1. Registrar en lista de matrículas con su duración específica
+            MATRICULAS_REGISTRADAS.unshift({
+                id: MATRICULAS_REGISTRADAS.length + 1,
+                alumno: nombre,
+                rut: rut,
+                curso: cursoNombre,
+                duracionMeses: duracionMesesNum,
+                modalidad: modalidad,
+                horario: horario,
+                dias: dias,
+                fecha: hoy,
+                archivo: nombreArchivo
+            });
+
+            // Limpiar borrador al completar con éxito
+            BORRADOR_MATRICULA = null;
+
+            // 2. Si el correo no existe en la base de usuarios, lo agregamos automáticamente como estudiante
+            if (!USERS_DB[email]) {
+                USERS_DB[email] = { name: nombre, rut: rut, role: 'Estudiante', pass: 'sematec2026' };
+            }
+
+            // 3. Buscar precio del curso seleccionado para generar automáticamente su registro financiero
+            const cursoObj = CURSOS_INSTITUCION.find(c => c.nombre === cursoNombre);
+            const precioCurso = cursoObj ? cursoObj.precio : 150000;
+
+            // 4. CREACIÓN / ACTUALIZACIÓN AUTOMÁTICA EN FINANZAS Y PAGOS CON LA DURACIÓN CORREGIDA/PERSONALIZADA
+            ALUMNOS_FINANZAS_DB[rut] = {
+                nombre: nombre,
+                rut: rut,
+                email: email,
+                curso: cursoNombre,
+                mensualidad: precioCurso,
+                duracionMeses: duracionMesesNum, // Duración personalizada aplicada al estudiante
+                asistencia: 100,
+                nota: 7.0,
+                telefono: "+56 9 0000 0000",
+                direccion: "Dirección Registrada",
+                pagosHistorial: [
+                    { fecha: hoy, monto: precioCurso } // Matrícula o primera mensualidad cargada automáticamente
+                ]
+            };
+
+            // Establecer por defecto este alumno en la vista financiera si el usuario es admin/profe
+            rutAlumnoSeleccionadoFinanzas = rut;
+
+            registrarLog(currentUser ? currentUser.email : email, `Realizó matrícula formal con duración de ${duracionMesesNum} meses y generó perfil financiero automático para: ${nombre} (${cursoNombre} - ${formatMoney(precioCurso)}/mes) adjuntando: ${nombreArchivo}`);
+            alert(`¡Matrícula ingresada con éxito! Se ha configurado una duración de ${duracionMesesNum} meses y se creó automáticamente su cuenta en Finanzas.`);
+            
+            loadModule('matriculas');
+        }
+
+        // CORREGIR / ACTUALIZAR DURACIÓN DE CURSO DE UN ALUMNO MATRICULADO (DESDE LA VISTA DE MATRÍCULAS)
+        function corregirDuracionMatricula(matId) {
+            const matriculaObj = MATRICULAS_REGISTRADAS.find(m => m.id === matId);
+            if (!matriculaObj) return;
+
+            const nuevaDuracion = prompt(`Ingrese la duración corregida en meses para el alumno ${matriculaObj.alumno} (${matriculaObj.curso}):`, matriculaObj.duracionMeses);
+            if (nuevaDuracion !== null) {
+                const mesesNum = parseInt(nuevaDuracion);
+                if (!isNaN(mesesNum) && mesesNum > 0) {
+                    // Actualizar en el registro de matrículas
+                    matriculaObj.duracionMeses = mesesNum;
+
+                    // Actualizar también en la base de finanzas del alumno si existe por RUT
+                    if (ALUMNOS_FINANZAS_DB[matriculaObj.rut]) {
+                        ALUMNOS_FINANZAS_DB[matriculaObj.rut].duracionMeses = mesesNum;
+                    }
+
+                    registrarLog(currentUser.email, `Modificó la duración del curso de ${matriculaObj.alumno} a ${mesesNum} meses.`);
+                    alert(`¡Duración actualizada correctamente a ${mesesNum} meses! Los cálculos financieros del arancel total se han recalculado automáticamente.`);
+                    loadModule('matriculas');
+                } else {
+                    alert("Por favor, ingrese un número válido de meses mayor a 0.");
+                }
+            }
+        }
+
+        // ACCIONES DEL ADMINISTRADOR (CRUD COMPLETO SOBRE USUARIOS)
+        function crearUsuarioAdmin(event) {
+            event.preventDefault();
+            const email = document.getElementById('new-user-email').value.trim();
+            const name = document.getElementById('new-user-name').value.trim();
+            const rut = document.getElementById('new-user-rut').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const pass = document.getElementById('new-user-pass').value;
+
+            if (USERS_DB[email]) {
+                alert("Este correo electrónico ya está registrado.");
+                return;
+            }
+
+            USERS_DB[email] = { name: name, rut: rut, role: role, pass: pass };
+            if(role === 'Estudiante') {
+                if(!ALUMNOS_FINANZAS_DB[rut]) {
+                    ALUMNOS_FINANZAS_DB[rut] = {
+                        nombre: name,
+                        rut: rut,
+                        email: email,
+                        curso: CURSOS_INSTITUCION[0].nombre,
+                        mensualidad: CURSOS_INSTITUCION[0].precio,
+                        duracionMeses: 10,
+                        asistencia: 100,
+                        nota: 7.0,
+                        telefono: "+56 9 0000 0000",
+                        direccion: "Santiago",
+                        pagosHistorial: []
+                    };
+                }
+            }
+            registrarLog(currentUser.email, `Creó usuario: ${name} (RUT: ${rut}) con Rol: ${role}`);
+            alert("Usuario registrado de manera exitosa en el sistema.");
+            loadModule('usuarios');
+        }
+
+        function eliminarUsuarioAdmin(email) {
+            if (email === currentUser.email) {
+                alert("No puedes eliminar tu propia cuenta activa.");
+                return;
+            }
+            if (confirm(`¿Estás completamente seguro de borrar la cuenta ${email}?`)) {
+                const nombreEliminado = USERS_DB[email].name;
+                delete USERS_DB[email];
+                registrarLog(currentUser.email, `Eliminó la cuenta de: ${nombreEliminado}`);
+                loadModule('usuarios');
+            }
+        }
+
+        function modificarUsuarioAdmin(email) {
+            const nuevoNombre = prompt("Ingrese nuevo nombre completo:", USERS_DB[email].name);
+            if (nuevoNombre) {
+                USERS_DB[email].name = nuevoNombre;
+                registrarLog(currentUser.email, `Modificó nombre de la cuenta ${email} a: ${nuevoNombre}`);
+                loadModule('usuarios');
+            }
+        }
+
+        // ACCIONES DEL PROFESOR Y ADMIN (LIBRO, NOTAS, ASISTENCIA Y GRUPOS)
+        function agregarLibroEstudio(event) {
+            event.preventDefault();
+            const curso = document.getElementById('libro-curso').value;
+            const tema = document.getElementById('libro-tema').value.trim();
+            const fecha = document.getElementById('libro-fecha').value;
+            const archivoInput = document.getElementById('libro-archivo-input');
+            
+            let archivo = "documento_adjunto.pdf";
+            if (archivoInput.files && archivoInput.files[0]) {
+                archivo = archivoInput.files[0].name;
+            }
+
+            const newId = LIBROS_ESTUDIO.length + 1;
+            LIBROS_ESTUDIO.push({ id: newId, curso: curso, tema: tema, fecha: fecha, archivo: archivo });
+            registrarLog(currentUser.email, `Agregó entrada al libro y archivo "${archivo}" en ${curso}`);
+            alert("Tema y archivo digital subido desde dispositivo exitosamente.");
+            loadModule('academico');
+        }
+
+        function actualizarNotaAsistenciaProfe(event) {
+            event.preventDefault();
+            const alumnoActual = obtenerAlumnoFinanzasActual();
+            alumnoActual.asistencia = parseInt(document.getElementById('profe-asistencia').value) || 0;
+            alumnoActual.nota = parseFloat(document.getElementById('profe-nota').value) || 1.0;
+            
+            registrarLog(currentUser.email, `Modificó Libro Digital para ${alumnoActual.nombre} - Nota: ${alumnoActual.nota}, Asistencia: ${alumnoActual.asistencia}%`);
+            alert("Registros guardados dinámicamente.");
+            loadModule('academico');
+        }
+
+        function crearGrupoCurso(event) {
+            event.preventDefault();
+            const nombre = document.getElementById('grupo-nombre').value.trim();
+            const precio = parseInt(document.getElementById('grupo-precio').value) || 100000;
+            const duracion = document.getElementById('grupo-duracion').value + " meses";
+            const modalidad = document.getElementById('grupo-modalidad').value;
+            const horario = document.getElementById('grupo-horario').value.trim();
+            const dias = document.getElementById('grupo-dias').value.trim();
+            const descripcion = document.getElementById('grupo-desc').value.trim();
+            const randomId = "CUR" + Math.floor(100 + Math.random() * 900);
+
+            CURSOS_INSTITUCION.push({ id: randomId, nombre: nombre, precio: precio, duracion: duracion, modalidad: modalidad, horario: horario, dias: dias, descripcion: descripcion });
+            registrarLog(currentUser.email, `Creó un nuevo grupo de estudio/curso: ${nombre}`);
+            alert(`Grupo "${nombre}" creado con éxito.`);
+            loadModule('cursos-disponibles');
+        }
+
+        // GESTIÓN FINANCIERA
+        function cambiarAlumnoSeleccionadoFinanzas(rut) {
+            rutAlumnoSeleccionadoFinanzas = rut;
+            loadModule('pagos');
+        }
+
+        function registrarPagoFinanciero(event) {
+            event.preventDefault();
+            const monto = parseInt(document.getElementById('admin-pago-monto').value);
+            const fecha = document.getElementById('admin-pago-fecha').value;
+            const alumnoActual = obtenerAlumnoFinanzasActual();
+
+            if (monto > 0 && fecha && alumnoActual) {
+                alumnoActual.pagosHistorial.push({ fecha: fecha, monto: monto });
+                registrarLog(currentUser.email, `Registró pago de mensualidad por ${formatMoney(monto)} para el alumno ${alumnoActual.nombre}`);
+                alert("Abono guardado correctamente.");
+                loadModule('pagos');
+            }
+        }
+
+        function alternarPermisoProfesor() {
+            profesorAutorizadoPagos = document.getElementById('toggle-profe-permiso').checked;
+            registrarLog(currentUser.email, `Cambió estatus recaudación docente a: ${profesorAutorizadoPagos}`);
+        }
+
+        // CARGADOR GENERAL DE MÓDULOS DEL ENTORNO
+        function loadModule(moduleId) {
+            currentModuleId = moduleId;
+            document.querySelectorAll('#sidebar-menu button').forEach(b => b.classList.remove('bg-slate-800', 'text-white'));
+            const activeBtn = document.getElementById(`btn-${moduleId}`);
+            if (activeBtn) activeBtn.classList.add('bg-slate-800', 'text-white');
+
+            const container = document.getElementById('module-container');
+            const title = document.getElementById('page-title');
+
+            const alumnoActual = obtenerAlumnoFinanzasActual();
+            const costoTotal = alumnoActual ? calcularCostoTotal(alumnoActual) : 0;
+            const totalPagado = alumnoActual ? calcularTotalPagado(alumnoActual) : 0;
+            const saldoPendiente = alumnoActual ? calcularSaldoPendiente(alumnoActual) : 0;
+            const avancePorcentaje = alumnoActual ? calcularPorcentajeAvance(alumnoActual) : 0;
+            const estadoPago = alumnoActual ? calcularEstadoPago(alumnoActual) : 'Pendiente';
+
+            // MÓDULO 1: GESTIÓN DE USUARIOS
+            if (moduleId === 'usuarios') {
+                title.innerText = "Consola de Administración - Usuarios";
+                
+                const filteredUsers = Object.keys(USERS_DB).filter(email => {
+                    const u = USERS_DB[email];
+                    return u.name.toLowerCase().includes(searchQueryGlobal) ||
+                           email.toLowerCase().includes(searchQueryGlobal) ||
+                           (u.rut && u.rut.toLowerCase().includes(searchQueryGlobal)) ||
+                           u.role.toLowerCase().includes(searchQueryGlobal);
+                });
+
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-5 rounded-xl border shadow-sm lg:col-span-1">
+                            <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1"><i data-lucide="user-plus" class="w-4 h-4 text-blue-600"></i> Registrar Nuevo Usuario</h3>
+                            <form onsubmit="crearUsuarioAdmin(event)" class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Nombre Completo</label>
+                                    <input type="text" id="new-user-name" required placeholder="Ej: Juan Pérez" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">RUT</label>
+                                    <input type="text" id="new-user-rut" required placeholder="12.345.678-9" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Correo Institucional</label>
+                                    <input type="email" id="new-user-email" required placeholder="correo@sematec.cl" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Rol Operativo</label>
+                                    <select id="new-user-role" class="w-full p-2 border rounded bg-gray-50">
+                                        <option value="Profesor">Profesor</option>
+                                        <option value="Estudiante">Estudiante</option>
+                                        <option value="Administrador">Administrador</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Contraseña Inicial</label>
+                                    <input type="password" id="new-user-pass" required placeholder="••••••••" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded text-xs hover:bg-blue-700 transition shadow-sm">Inyectar Cuenta a BD</button>
+                            </form>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border shadow-sm lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-bold text-gray-900">Usuarios Vigentes en Base de Datos</h3>
+                                ${searchQueryGlobal ? `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">Filtrando por: "${searchQueryGlobal}"</span>` : ''}
+                            </div>
+                            <div class="overflow-x-auto text-xs">
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-50 border-b font-semibold text-gray-600">
+                                        <tr>
+                                            <th class="p-2.5">Nombre</th>
+                                            <th class="p-2.5">RUT</th>
+                                            <th class="p-2.5">Correo</th>
+                                            <th class="p-2.5">Rol</th>
+                                            <th class="p-2.5 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y font-medium text-gray-700">
+                                        ${filteredUsers.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-400">No se encontraron usuarios coincidentes.</td></tr>` : 
+                                        filteredUsers.map(email => `
+                                            <tr>
+                                                <td class="p-2.5 text-gray-900">${USERS_DB[email].name}</td>
+                                                <td class="p-2.5 text-gray-600">${USERS_DB[email].rut || 'N/A'}</td>
+                                                <td class="p-2.5 text-gray-500">${email}</td>
+                                                <td class="p-2.5">
+                                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${USERS_DB[email].role==='Administrador'?'bg-blue-100 text-blue-800':USERS_DB[email].role==='Profesor'?'bg-indigo-100 text-indigo-800':'bg-emerald-100 text-emerald-800'}">
+                                                        ${USERS_DB[email].role}
+                                                    </span>
+                                                </td>
+                                                <td class="p-2.5 text-right space-x-1">
+                                                    <button onclick="modificarUsuarioAdmin('${email}')" class="text-blue-600 hover:bg-blue-50 border px-1.5 py-0.5 rounded">Modificar</button>
+                                                    <button onclick="eliminarUsuarioAdmin('${email}')" class="text-rose-600 hover:bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded">Eliminar</button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="text-xs font-bold text-gray-900 mb-2">Llave Maestra Administrativa</h4>
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="toggle-profe-permiso" ${profesorAutorizadoPagos ? 'checked' : ''} onchange="alternarPermisoProfesor()" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="toggle-profe-permiso" class="text-xs font-semibold text-gray-700">Permitir a Profesores Registrar Transacciones de Caja</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // MÓDULO 2: FORMULARIO DE MATRÍCULA Y CARGA DE ARCHIVOS
+            else if (moduleId === 'matriculas') {
+                title.innerText = "Formulario de Matrícula Oficial y Carga de Archivos";
+
+                const filteredMatriculas = MATRICULAS_REGISTRADAS.filter(m =>
+                    m.alumno.toLowerCase().includes(searchQueryGlobal) ||
+                    m.rut.toLowerCase().includes(searchQueryGlobal) ||
+                    m.curso.toLowerCase().includes(searchQueryGlobal) ||
+                    m.modalidad.toLowerCase().includes(searchQueryGlobal) ||
+                    m.archivo.toLowerCase().includes(searchQueryGlobal)
+                );
+
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-5 rounded-xl border shadow-sm lg:col-span-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-bold text-gray-900 flex items-center gap-1"><i data-lucide="file-plus" class="w-4 h-4 text-blue-600"></i> Nueva Matrícula</h3>
+                                ${BORRADOR_MATRICULA ? `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">Borrador Activo</span>` : ''}
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">Seleccione curso, duración en meses, modalidad y adjunte documentos. El sistema calculará automáticamente las finanzas del alumno.</p>
+                            
+                            <form id="form-matricula-principal" onsubmit="procesarMatriculaFormulario(event)" class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Nombre Completo del Alumno</label>
+                                    <input type="text" id="mat-nombre" required value="${BORRADOR_MATRICULA ? BORRADOR_MATRICULA.nombre : ''}" placeholder="Ej: Valentina Soto" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">RUT o Identificación</label>
+                                    <input type="text" id="mat-rut" required value="${BORRADOR_MATRICULA ? BORRADOR_MATRICULA.rut : ''}" placeholder="19.888.777-2" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Correo Electrónico de Contacto</label>
+                                    <input type="email" id="mat-email" required value="${BORRADOR_MATRICULA ? BORRADOR_MATRICULA.email : ''}" placeholder="correo@sematec.cl" class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Elegir Curso o Programa</label>
+                                    <select id="mat-curso" onchange="onCursoMatriculaChange()" class="w-full p-2 border rounded bg-gray-50 font-bold text-blue-700">
+                                        ${CURSOS_INSTITUCION.map(c => `<option value="${c.nombre}" ${BORRADOR_MATRICULA && BORRADOR_MATRICULA.curso === c.nombre ? 'selected' : ''}>${c.nombre} (${formatMoney(c.precio)}/mes)</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Duración (Meses)</label>
+                                        <input type="number" id="mat-duracion" min="1" max="36" required value="${BORRADOR_MATRICULA ? BORRADOR_MATRICULA.duracionMeses : 10}" class="w-full p-2 border rounded bg-gray-50 font-bold text-blue-700">
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Modalidad</label>
+                                        <select id="mat-modalidad" class="w-full p-2 border rounded bg-gray-50">
+                                            <option value="Online" ${BORRADOR_MATRICULA && BORRADOR_MATRICULA.modalidad === 'Online' ? 'selected' : ''}>Online</option>
+                                            <option value="Presencial" ${BORRADOR_MATRICULA && BORRADOR_MATRICULA.modalidad === 'Presencial' ? 'selected' : ''}>Presencial</option>
+                                            <option value="Semipresencial" ${BORRADOR_MATRICULA && BORRADOR_MATRICULA.modalidad === 'Semipresencial' ? 'selected' : ''}>Semipresencial</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Días de Estudio</label>
+                                        <input type="text" id="mat-dias" required value="${BORRADOR_MATRICULA ? BORRADOR_MATRICULA.dias : CURSOS_INSTITUCION[0].dias}" placeholder="Ej: Lun y Mié" class="w-full p-2 border rounded bg-gray-50">
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Horario Seleccionado</label>
+                                        <input type="text" id="mat-horario" required value="${BORRADOR_MATRICULA ? BORRADOR_MATRICULA.horario : CURSOS_INSTITUCION[0].horario}" placeholder="Ej: 19:00 - 22:00" class="w-full p-2 border rounded bg-gray-50">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Adjuntar Archivo desde Dispositivo (PDF/Imagen)</label>
+                                    <input type="file" id="mat-archivo" required class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border rounded bg-gray-50">
+                                </div>
+
+                                <!-- Botones de acción solicitados: Seguir, Guardar Borrador, Cancelar y Enviar -->
+                                <div class="space-y-2 pt-2">
+                                    <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded text-xs hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4"></i> Registrar y Subir Matrícula
+                                    </button>
+                                    
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button type="button" onclick="guardarBorradorMatricula()" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-1.5 rounded text-[11px] transition shadow-sm text-center">
+                                            Guardar Borrador
+                                        </button>
+                                        <button type="button" onclick="alert('Continuando formulario... Puedes seguir completando los campos pendientes.')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1.5 rounded text-[11px] transition shadow-sm text-center">
+                                            Seguir
+                                        </button>
+                                        <button type="button" onclick="cancelarMatriculaForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-1.5 rounded text-[11px] transition text-center">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border shadow-sm lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-bold text-gray-900">Historial de Alumnos Matriculados</h3>
+                                ${searchQueryGlobal ? `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">Buscando: "${searchQueryGlobal}"</span>` : ''}
+                            </div>
+                            <div class="overflow-x-auto text-xs">
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-50 border-b font-semibold text-gray-600">
+                                        <tr>
+                                            <th class="p-2.5">Alumno</th>
+                                            <th class="p-2.5">Curso / Duración</th>
+                                            <th class="p-2.5">Horario / Días</th>
+                                            <th class="p-2.5">Archivo Dispositivo</th>
+                                            <th class="p-2.5 text-right">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y font-medium text-gray-700">
+                                        ${filteredMatriculas.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-400">No se encontraron matrículas con ese criterio.</td></tr>` :
+                                        filteredMatriculas.map(m => `
+                                            <tr>
+                                                <td class="p-2.5">
+                                                    <p class="font-bold text-gray-900">${m.alumno}</p>
+                                                    <p class="text-[11px] text-gray-500 font-mono">${m.rut}</p>
+                                                </td>
+                                                <td class="p-2.5">
+                                                    <span class="text-blue-600 font-semibold">${m.curso}</span><br>
+                                                    <span class="bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-bold">${m.duracionMeses} Meses</span>
+                                                    <span class="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${m.modalidad}</span>
+                                                </td>
+                                                <td class="p-2.5 text-gray-600">
+                                                    <p>${m.dias}</p>
+                                                    <p class="text-[11px] text-gray-500 font-mono">${m.horario}</p>
+                                                </td>
+                                                <td class="p-2.5">
+                                                    <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-mono border border-emerald-100">
+                                                        <i data-lucide="file-check" class="w-3 h-3 text-emerald-600"></i> ${m.archivo}
+                                                    </span>
+                                                </td>
+                                                <td class="p-2.5 text-right">
+                                                    <button onclick="corregirDuracionMatricula(${m.id})" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2 py-1 rounded font-semibold transition" title="Modificar duración en meses de este alumno">
+                                                        Corregir Duración
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // MÓDULO 3: CONTROL ACADÉMICO
+            else if (moduleId === 'academico') {
+                title.innerText = "Libro Digital, Control de Notas y Grupos de Alumnos";
+                let htmlContent = '';
+
+                if (currentUser.role === 'Profesor' || currentUser.role === 'Administrador') {
+                    htmlContent += `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                                <h3 class="text-xs font-bold text-gray-900 mb-3 flex items-center gap-1"><i data-lucide="edit-3" class="w-4 h-4 text-indigo-600"></i> Calificar Alumno y Registrar Asistencia</h3>
+                                <form onsubmit="actualizarNotaAsistenciaProfe(event)" class="space-y-3 text-xs">
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Seleccionar Alumno</label>
+                                        <select class="w-full p-2 border rounded bg-gray-50">
+                                            ${Object.values(ALUMNOS_FINANZAS_DB).map(a => `<option value="${a.rut}" ${a.rut === alumnoActual.rut ? 'selected' : ''}>${a.nombre} (${a.curso})</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Porcentaje Asistencia (%)</label>
+                                            <input type="number" id="profe-asistencia" min="0" max="100" value="${alumnoActual.asistencia}" class="w-full p-2 border rounded bg-gray-50 font-bold">
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Nota del Alumno (1.0 - 7.0)</label>
+                                            <input type="number" id="profe-nota" min="1" max="7" step="0.1" value="${alumnoActual.nota}" class="w-full p-2 border rounded bg-gray-50 font-bold">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded text-xs hover:bg-indigo-700 transition">Modificar Libreta Digital</button>
+                                </form>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                                <h3 class="text-xs font-bold text-gray-900 mb-3 flex items-center gap-1"><i data-lucide="folder-plus" class="w-4 h-4 text-purple-600"></i> Crear Nuevo Grupo / Curso y Horario</h3>
+                                <form onsubmit="crearGrupoCurso(event)" class="space-y-3 text-xs">
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Nombre del Grupo / Curso</label>
+                                        <input type="text" id="grupo-nombre" required placeholder="Ej: Conectividad y Redes Avanzadas" class="w-full p-2 border rounded bg-gray-50">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Arancel Mensual ($)</label>
+                                            <input type="number" id="grupo-precio" min="10000" step="5000" required value="140000" class="w-full p-2 border rounded bg-gray-50 font-bold">
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Duración Base (Meses)</label>
+                                            <input type="number" id="grupo-duracion" min="1" max="24" required placeholder="10" class="w-full p-2 border rounded bg-gray-50">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Modalidad</label>
+                                            <select id="grupo-modalidad" class="w-full p-2 border rounded bg-gray-50">
+                                                <option value="Online">Online</option>
+                                                <option value="Presencial">Presencial</option>
+                                                <option value="Semipresencial">Semipresencial</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Días</label>
+                                            <input type="text" id="grupo-dias" required placeholder="Mar y Jue" class="w-full p-2 border rounded bg-gray-50">
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium text-gray-600 mb-1">Horario</label>
+                                            <input type="text" id="grupo-horario" required placeholder="19:00 - 21:00" class="w-full p-2 border rounded bg-gray-50">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Descripción Breve</label>
+                                        <input type="text" id="grupo-desc" required placeholder="Breve detalle del programa..." class="w-full p-2 border rounded bg-gray-50">
+                                    </div>
+                                    <button type="submit" class="w-full bg-purple-600 text-white font-semibold py-2 rounded text-xs hover:bg-purple-700 transition shadow-sm">Crear Curso con Horario</button>
+                                </form>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const filteredLibros = LIBROS_ESTUDIO.filter(l => 
+                    l.curso.toLowerCase().includes(searchQueryGlobal) ||
+                    l.tema.toLowerCase().includes(searchQueryGlobal) ||
+                    l.archivo.toLowerCase().includes(searchQueryGlobal) ||
+                    l.fecha.includes(searchQueryGlobal)
+                );
+
+                htmlContent += `
+                    <div class="bg-white p-5 rounded-xl border shadow-sm mb-6">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1"><i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i> Registrar Actividad y Subir Archivo desde Dispositivo</h3>
+                        <form onsubmit="agregarLibroEstudio(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end text-xs">
+                            <div>
+                                <label class="block font-medium text-gray-600 mb-1">Curso / Grupo</label>
+                                <select id="libro-curso" class="w-full p-2 border rounded bg-gray-50">
+                                    ${CURSOS_INSTITUCION.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-medium text-gray-600 mb-1">Contenido / Tema</label>
+                                <input type="text" id="libro-tema" required placeholder="Ej: Práctica de Bucles" class="w-full p-2 border rounded bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-gray-600 mb-1">Archivo del Dispositivo</label>
+                                <input type="file" id="libro-archivo-input" required class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 border rounded bg-gray-50">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-medium text-gray-600 mb-1">Fecha</label>
+                                    <input type="date" id="libro-fecha" required class="w-full p-2 border rounded bg-gray-50">
+                                </div>
+                                <button type="submit" class="bg-slate-900 text-white font-semibold py-2 rounded text-xs hover:bg-slate-800 transition shadow-sm">Firmar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-gray-900">Historial de Clases y Archivos del Sistema</h3>
+                            ${searchQueryGlobal ? `<span class="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded font-medium">Buscando: "${searchQueryGlobal}"</span>` : ''}
+                        </div>
+                        <div class="overflow-x-auto text-xs">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50 border-b font-semibold text-gray-600">
+                                    <tr>
+                                        <th class="p-2.5">Fecha</th>
+                                        <th class="p-2.5">Curso</th>
+                                        <th class="p-2.5">Contenido Dictado</th>
+                                        <th class="p-2.5">Archivo / Documento</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y font-medium text-gray-700">
+                                    ${filteredLibros.length === 0 ? `<tr><td colspan="4" class="p-4 text-center text-gray-400">No se encontraron registros o archivos con ese criterio.</td></tr>` :
+                                    filteredLibros.map(l => `
+                                        <tr>
+                                            <td class="p-2.5 text-gray-500 whitespace-nowrap">${l.fecha}</td>
+                                            <td class="p-2.5 text-indigo-600 font-bold">${l.curso}</td>
+                                            <td class="p-2.5 text-gray-900">${l.tema}</td>
+                                            <td class="p-2.5">
+                                                <span class="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-mono">
+                                                    <i data-lucide="file-text" class="w-3 h-3 text-blue-600"></i> ${l.archivo}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = htmlContent;
+            }
+
+            // MÓDULO 4: CURSOS Y PRECIOS
+            else if (moduleId === 'cursos-disponibles') {
+                title.innerText = "Cursos, Modalidades, Horarios y Gestión Dinámica de Precios";
+                
+                const filteredCursos = CURSOS_INSTITUCION.filter(c =>
+                    c.nombre.toLowerCase().includes(searchQueryGlobal) ||
+                    c.id.toLowerCase().includes(searchQueryGlobal) ||
+                    c.modalidad.toLowerCase().includes(searchQueryGlobal) ||
+                    c.horario.toLowerCase().includes(searchQueryGlobal) ||
+                    c.dias.toLowerCase().includes(searchQueryGlobal) ||
+                    c.precio.toString().includes(searchQueryGlobal)
+                );
+
+                container.innerHTML = `
+                    <div class="mb-4 flex items-center justify-between">
+                        <p class="text-xs text-gray-500">Aquí puedes revisar las alternativas de estudio (Online, Presencial, Semipresencial), sus horarios y modificar los precios en tiempo real sin tocar código.</p>
+                        ${searchQueryGlobal ? `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">Filtro: "${searchQueryGlobal}"</span>` : ''}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${filteredCursos.length === 0 ? `<div class="col-span-3 text-center p-8 bg-white rounded-xl border text-gray-400 text-xs">No hay cursos disponibles que coincidan con la búsqueda.</div>` :
+                        filteredCursos.map(curso => `
+                            <div class="bg-white rounded-xl border shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-blue-100 text-blue-800">${curso.id}</span>
+                                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">${curso.modalidad}</span>
+                                    </div>
+                                    <h3 class="text-base font-bold text-gray-900 mb-1">${curso.nombre}</h3>
+                                    <p class="text-xs text-gray-600 mb-3">${curso.descripcion}</p>
+                                    
+                                    <div class="bg-gray-50 p-3 rounded-lg border text-xs space-y-1 mb-4 text-gray-600">
+                                        <p class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-600"></i> Días: <b>${curso.dias}</b></p>
+                                        <p class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600"></i> Horario: <b>${curso.horario}</b></p>
+                                        <p class="flex items-center gap-1.5"><i data-lucide="hourglass" class="w-3.5 h-3.5 text-blue-600"></i> Duración Base: <b>${curso.duracion}</b></p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-3 pb-3 border-t pt-3">
+                                        <span class="text-xs font-bold text-gray-500 uppercase">Mensualidad:</span>
+                                        <span class="text-base font-black text-gray-900">${formatMoney(curso.precio)}</span>
+                                    </div>
+
+                                    ${currentUser.role === 'Administrador' ? `
+                                        <form onsubmit="actualizarPrecioCursoAdmin(event, '${curso.id}')" class="flex gap-2 mb-2">
+                                            <input type="number" id="precio-${curso.id}" min="10000" step="5000" required value="${curso.precio}" class="w-full p-1.5 border rounded text-xs bg-gray-50 font-bold">
+                                            <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-sm whitespace-nowrap">Cambiar Precio</button>
+                                        </form>
+                                    ` : ''}
+
+                                    <button onclick="loadModule('matriculas')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs transition shadow-sm text-center">Matricularse en este Curso</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // MÓDULO 5: FINANZAS Y PAGOS
+            else if (moduleId === 'pagos') {
+                title.innerText = "Módulo de Finanzas - Control de Caja e Historial de Recaudación";
+                
+                let puedeRegistrar = currentUser.role === 'Administrador' || (currentUser.role === 'Profesor' && profesorAutorizadoPagos);
+            
+                const filteredPagos = alumnoActual ? alumnoActual.pagosHistorial.filter(p =>
+                    p.fecha.includes(searchQueryGlobal) ||
+                    alumnoActual.nombre.toLowerCase().includes(searchQueryGlobal) ||
+                    alumnoActual.rut.toLowerCase().includes(searchQueryGlobal) ||
+                    p.monto.toString().includes(searchQueryGlobal)
+                ) : [];
+
+                container.innerHTML = `
+                    <!-- Selector de alumno para administradores o profesores -->
+                    ${currentUser.role !== 'Estudiante' ? `
+                        <div class="bg-white p-4 rounded-xl border shadow-sm mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i>
+                                <span class="text-xs font-bold text-gray-700">Seleccionar Alumno en Finanzas:</span>
+                            </div>
+                            <select onchange="cambiarAlumnoSeleccionadoFinanzas(this.value)" class="w-full sm:w-80 p-2 border rounded text-xs bg-gray-50 font-bold text-blue-700">
+                                ${Object.values(ALUMNOS_FINANZAS_DB).map(a => `<option value="${a.rut}" ${a.rut === alumnoActual.rut ? 'selected' : ''}>${a.nombre} (${a.curso} - ${a.duracionMeses} meses - ${formatMoney(a.mensualidad)}/mes)</option>`).join('')}
+                            </select>
+                        </div>
+                    ` : ''}
+
+                    <div class="bg-indigo-900 text-white p-4 rounded-xl shadow-sm mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded font-bold uppercase">Curso Asignado</span>
+                            <h3 class="text-lg font-bold mt-1">${alumnoActual ? alumnoActual.curso : 'Sin curso'}</h3>
+                            <p class="text-xs text-indigo-200">Alumno: <b>${alumnoActual ? alumnoActual.nombre : ''}</b> (${alumnoActual ? alumnoActual.rut : ''}) | Arancel Mensual: <b>${alumnoActual ? formatMoney(alumnoActual.mensualidad) : '$0'}</b></p>
+                        </div>
+                        <div class="bg-indigo-950/80 px-4 py-2 rounded-lg border border-indigo-700 text-right">
+                            <span class="text-[10px] text-indigo-300 block uppercase font-bold">Duración Configurada</span>
+                            <span class="text-sm font-bold">${alumnoActual ? alumnoActual.duracionMeses : 0} Meses</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-xl border shadow-sm">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Costo Total Arancel</p>
+                            <p class="text-xl font-black text-gray-900 mt-1">${formatMoney(costoTotal)}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border shadow-sm">
+                            <p class="text-xs font-bold text-emerald-600 uppercase">Total Recaudado</p>
+                            <p class="text-xl font-black text-emerald-600 mt-1">${formatMoney(totalPagado)}</p>
+                            <span class="text-[10px] text-gray-400 font-medium">Avance del ${avancePorcentaje}%</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border shadow-sm">
+                            <p class="text-xs font-bold text-rose-600 uppercase">Saldo Pendiente</p>
+                            <p class="text-xl font-black text-rose-600 mt-1">${formatMoney(saldoPendiente)}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border shadow-sm">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Estado Financiero</p>
+                            <div class="mt-2">
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-full ${estadoPago==='Al día'?'bg-emerald-100 text-emerald-800':'bg-amber-100 text-amber-800'}">
+                                    ${estadoPago}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-5 rounded-xl border shadow-sm lg:col-span-1">
+                            <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1"><i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-600"></i> Registrar Abono / Pago</h3>
+                            
+                            ${puedeRegistrar ? `
+                                <form onsubmit="registrarPagoFinanciero(event)" class="space-y-3 text-xs">
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Alumno Relacionado (RUT)</label>
+                                        <select class="w-full p-2 border rounded bg-gray-50 font-bold"><option>${alumnoActual ? alumnoActual.nombre : ''} - ${alumnoActual ? alumnoActual.rut : ''}</option></select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Monto a Recaudar ($)</label>
+                                        <input type="number" id="admin-pago-monto" min="1000" step="1000" required value="${alumnoActual ? alumnoActual.mensualidad : 150000}" class="w-full p-2 border rounded bg-gray-50 font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block font-medium text-gray-600 mb-1">Fecha de Operación</label>
+                                        <input type="date" id="admin-pago-fecha" required class="w-full p-2 border rounded bg-gray-50">
+                                    </div>
+                                    <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2 rounded text-xs hover:bg-emerald-700 transition shadow-sm">Procesar e Imprimir Comprobante</button>
+                                </form>
+                            ` : `
+                                <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg text-xs font-medium">
+                                    <i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 mb-0.5"></i> Tu usuario actual no tiene permisos de recaudación en caja. Solicita autorización al Director.
+                                </div>
+                            `}
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border shadow-sm lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-bold text-gray-900">Comprobantes Digitales y Cuotas del Alumno</h3>
+                                ${searchQueryGlobal ? `<span class="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded font-medium">Filtro: "${searchQueryGlobal}"</span>` : ''}
+                            </div>
+                            <div class="overflow-x-auto text-xs">
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-50 border-b font-semibold text-gray-600">
+                                        <tr>
+                                            <th class="p-2.5">Fecha Pago</th>
+                                            <th class="p-2.5">Curso Asociado</th>
+                                            <th class="p-2.5">Monto</th>
+                                            <th class="p-2.5">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y font-medium text-gray-700">
+                                        ${filteredPagos.length === 0 ? `<tr><td colspan="4" class="p-4 text-center text-gray-400">No se encontraron pagos con ese filtro de búsqueda.</td></tr>` :
+                                        filteredPagos.map(pago => `
+                                            <tr>
+                                                <td class="p-2.5 text-gray-500">${pago.fecha}</td>
+                                                <td class="p-2.5 font-bold text-blue-600">${alumnoActual ? alumnoActual.curso : 'N/A'}</td>
+                                                <td class="p-2.5 font-bold text-emerald-600">${formatMoney(pago.monto)}</td>
+                                                <td class="p-2.5"><span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">Pagado / Registrado</span></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // MÓDULO 6: AUDITORÍA Y LOGS
+            else if (moduleId === 'reportes') {
+                title.innerText = "Bitácora de Auditoría del Sistema";
+                
+                const filteredLogs = auditoriaLogs.filter(log =>
+                    log.fecha.includes(searchQueryGlobal) ||
+                    log.usuario.toLowerCase().includes(searchQueryGlobal) ||
+                    log.accion.toLowerCase().includes(searchQueryGlobal)
+                );
+
+                container.innerHTML = `
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-gray-900">Registro de Eventos y Seguridad</h3>
+                            ${searchQueryGlobal ? `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">Filtro: "${searchQueryGlobal}"</span>` : ''}
+                        </div>
+                        <div class="overflow-x-auto text-xs">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50 border-b font-semibold text-gray-600">
+                                    <tr>
+                                        <th class="p-2.5">Fecha y Hora</th>
+                                        <th class="p-2.5">Usuario / Actor</th>
+                                        <th class="p-2.5">Acción Realizada</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y font-medium text-gray-700">
+                                    ${filteredLogs.length === 0 ? `<tr><td colspan="3" class="p-4 text-center text-gray-400">Sin coincidencias en los registros de auditoría.</td></tr>` :
+                                    filteredLogs.map(log => `
+                                        <tr>
+                                            <td class="p-2.5 text-gray-500 whitespace-nowrap">${log.fecha}</td>
+                                            <td class="p-2.5 font-bold text-blue-600">${log.usuario}</td>
+                                            <td class="p-2.5 text-gray-900">${log.accion}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // MÓDULO 7: MI PERFIL (ESTUDIANTE)
+            else if (moduleId === 'mi-perfil') {
+                title.innerText = "Mi Expediente Académico y Financiero";
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white p-5 rounded-xl border shadow-sm md:col-span-1 text-center">
+                            <div class="w-20 h-20 bg-emerald-100 text-emerald-700 font-black text-2xl rounded-full flex items-center justify-center mx-auto mb-3">
+                                ${alumnoActual ? alumnoActual.nota : '7.0'}
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-base">${alumnoActual ? alumnoActual.nombre : ''}</h3>
+                            <p class="text-xs text-gray-500 font-mono mb-1">RUT: ${alumnoActual ? alumnoActual.rut : ''}</p>
+                            <p class="text-xs text-blue-600 font-medium">${alumnoActual ? alumnoActual.curso : ''} (${alumnoActual ? alumnoActual.duracionMeses : 0} meses)</p>
+                            <div class="mt-4 pt-4 border-t text-left text-xs space-y-2 text-gray-600">
+                                <p><b>Teléfono:</b> ${alumnoActual ? alumnoActual.telefono : ''}</p>
+                                <p><b>Dirección:</b> ${alumnoActual ? alumnoActual.direccion : ''}</p>
+                                <p><b>Asistencia:</b> ${alumnoActual ? alumnoActual.asistencia : 100}%</p>
+                                <p><b>Arancel Mensual:</b> ${alumnoActual ? formatMoney(alumnoActual.mensualidad) : '$0'}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border shadow-sm md:col-span-2">
+                            <h3 class="text-sm font-bold text-gray-900 mb-4">Progreso de Cuotas y Aranceles</h3>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="bg-gray-50 p-3 rounded-lg border">
+                                    <span class="text-[10px] text-gray-500 uppercase font-bold">Total Arancel</span>
+                                    <p class="text-sm font-bold text-gray-900">${formatMoney(costoTotal)}</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg border">
+                                    <span class="text-[10px] text-emerald-600 uppercase font-bold">Pagado</span>
+                                    <p class="text-sm font-bold text-emerald-600">${formatMoney(totalPagado)}</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg border">
+                                    <span class="text-[10px] text-rose-600 uppercase font-bold">Deuda Actual</span>
+                                    <p class="text-sm font-bold text-rose-600">${formatMoney(saldoPendiente)}</p>
+                                </div>
+                            </div>
+                            <h4 class="text-xs font-bold text-gray-800 mb-2">Comprobantes Registrados Automáticamente</h4>
+                            <ul class="text-xs space-y-1">
+                                ${alumnoActual && alumnoActual.pagosHistorial.length > 0 ? alumnoActual.pagosHistorial.map(p => `
+                                    <li class="bg-gray-50 p-2 rounded flex justify-between">
+                                        <span class="text-gray-600">Fecha: ${p.fecha} (${alumnoActual.curso})</span>
+                                        <span class="font-bold text-emerald-600">${formatMoney(p.monto)}</span>
+                                    </li>
+                                `).join('') : `<li class="text-gray-400 italic">No hay pagos registrados aún.</li>`}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // MÓDULO 8: MENSAJERÍA / COMUNICACIONES
+            else if (moduleId === 'mensajeria') {
+                title.innerText = "Centro de Comunicaciones y Avisos";
+                container.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl border shadow-sm max-w-2xl mx-auto text-center">
+                        <div class="bg-blue-50 text-blue-600 p-4 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="send" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900">Módulo de Mensajería Institucional</h3>
+                        <p class="text-xs text-gray-500 mt-1 mb-4">Envía notificaciones o comunicados directos hacia los correos registrados del Instituto.</p>
+                        <form onsubmit="event.preventDefault(); alert('Mensaje transmitido correctamente.');" class="space-y-3 text-xs text-left">
+                            <div>
+                                <label class="block font-medium text-gray-600 mb-1">Destinatario</label>
+                                <select class="w-full p-2 border rounded bg-gray-50">
+                                    <option>Todos los alumnos del curso</option>
+                                    <option>Cuerpo Docente</option>
+                                    <option>Dirección General</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-medium text-gray-600 mb-1">Asunto / Mensaje</label>
+                                <textarea rows="3" required placeholder="Escribe tu comunicado aquí..." class="w-full p-2 border rounded bg-gray-50"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded text-xs hover:bg-blue-700 transition">Enviar Notificación</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            lucide.createIcons();
+        }
+    </script>
 </body>
 </html>
