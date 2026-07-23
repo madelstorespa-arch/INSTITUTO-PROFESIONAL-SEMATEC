@@ -8,18 +8,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Iconos Lucide para una interfaz profesional -->
     <script src="https://unpkg.com/lucide@latest"></script>
-</head>
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const firebaseConfig = {
-   // Pega aquí la configuración de Firebase
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-Y8JD5pO9H8CCIMsMPs1HxMSLFpLVf6k",
+      authDomain: "instituto-profesional-sematec.firebaseapp.com",
+      projectId: "instituto-profesional-sematec",
+      storageBucket: "instituto-profesional-sematec.firebasestorage.app",
+      messagingSenderId: "546208950767",
+      appId: "1:546208950767:web:e130afa3a0942aba53ae1a"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-</script>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+  </script>
+</head>
+    
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans">
 
     <!-- BOTÓN FLOTANTE PARA NAVEGAR A LA CUENTA/SITIO DEL INSTITUTO -->
