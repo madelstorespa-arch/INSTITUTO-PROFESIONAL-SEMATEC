@@ -24,6 +24,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-Y8JD5pO9H8CCIMsMPs1HxMSLFpLVf6k",
+    authDomain: "instituto-profesional-sematec.firebaseapp.com",
+    projectId: "instituto-profesional-sematec",
+    storageBucket: "instituto-profesional-sematec.firebasestorage.app",
+    messagingSenderId: "546208950767",
+    appId: "1:546208950767:web:e130afa3a0942aba53ae1a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 👇 PEGA EL CÓDIGO DE PRUEBA AQUÍ 👇
+  async function testFirestore() {
+    try {
+      const docRef = await addDoc(collection(db, "prueba"), {
+        mensaje: "¡Conexión exitosa desde el sitio web!",
+        fecha: new Date()
+      });
+      console.log("Documento escrito con ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error al añadir documento: ", e);
+    }
+  }
+
+  testFirestore();
+</script>
 </head>
     
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans">
