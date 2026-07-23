@@ -9,6 +9,17 @@
     <!-- Iconos Lucide para una interfaz profesional -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+   // Pega aquí la configuración de Firebase
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+</script>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans">
 
     <!-- BOTÓN FLOTANTE PARA NAVEGAR A LA CUENTA/SITIO DEL INSTITUTO -->
@@ -237,7 +248,7 @@
 
         // Listado de matrículas formales subidas desde dispositivo
         let MATRICULAS_REGISTRADAS = [
-            { id: 1, alumno: "Martín Carrasco", rut: "20.456.789-K", curso: "Desarrollo de Software v2", duracionMeses: 10, modalidad: "Semipresencial", horario: "19:00 - 22:00 hrs", dias: "Lunes y Miércoles", fecha: "2026-03-01", archivo: "certificado_estudios_martin.pdf" },
+            { id: 1, alumno: "clermond duval", rut: "28 57 60 85 -2", curso: "informática y computación", duracionMeses: 6, modalidad: "presencial", horario: "19:00 - 21:00 hrs", dias: "domingo", fecha: "2026-06-22", archivo: "certificado_estudios_martin.pdf" },
             { id: 2, alumno: "Valentina Soto", rut: "19.888.777-2", curso: "Administración de Redes y Conectividad", duracionMeses: 12, modalidad: "Online", horario: "09:00 - 13:00 hrs", dias: "Sábados", fecha: "2026-03-02", archivo: "cedula_identidad_valentina.jpg" }
         ];
 
@@ -246,7 +257,7 @@
 
         // Libro de estudio o bitácora de clases añadidos por los profesores
         let LIBROS_ESTUDIO = [
-            { id: 1, curso: "Desarrollo de Software v2", tema: "Introducción a Bases de Datos y Modelamiento SQL", fecha: "2026-07-10", archivo: "materia_sql.pdf" },
+            { id: 1, curso: "informática y computación", tema: "Introducción a Bases de Datos y Modelamiento SQL", fecha: "2026-07-10", archivo: "materia_sql.pdf" },
             { id: 2, curso: "Desarrollo de Software v2", tema: "Estructura de Control de Flujo y Funciones", fecha: "2026-07-15", archivo: "guia_funciones.docx" }
         ];
 
@@ -462,7 +473,7 @@
             const modalidad = document.getElementById('mat-modalidad').value;
             const horario = document.getElementById('mat-horario').value;
             const dias = document.getElementById('mat-dias').value;
-            const duracionMeses = parseInt(document.getElementById('mat-duracion').value) || 10;
+            const duracionMeses = parseInt(document.getElementById('mat-duracion').value) || 6;
 
             if (!nombre && !rut && !email) {
                 alert("Completa al menos un campo para guardar un borrador.");
@@ -493,7 +504,7 @@
             const modalidad = document.getElementById('mat-modalidad').value;
             const horario = document.getElementById('mat-horario').value;
             const dias = document.getElementById('mat-dias').value;
-            const duracionMesesNum = parseInt(document.getElementById('mat-duracion').value) || 10;
+            const duracionMesesNum = parseInt(document.getElementById('mat-duracion').value) || 6;
             const fileInput = document.getElementById('mat-archivo');
             
             let nombreArchivo = "documento_respaldo.pdf";
@@ -604,7 +615,7 @@
                         email: email,
                         curso: CURSOS_INSTITUCION[0].nombre,
                         mensualidad: CURSOS_INSTITUCION[0].precio,
-                        duracionMeses: 10,
+                        duracionMeses: 6,
                         asistencia: 100,
                         nota: 7.0,
                         telefono: "+56 9 0000 0000",
